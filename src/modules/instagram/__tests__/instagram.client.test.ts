@@ -60,7 +60,7 @@ describe('InstagramClient', () => {
       expect(calledUrl).toContain('q=matcha');
     });
 
-    it('throws MetaApiError when Meta returns an error body (HTTP 200)', async () => {
+    it('throws MetaApiError with message, type, code, and fbtrace_id when Meta returns an error body (HTTP 200)', async () => {
       const errorBody = {
         error: {
           message: 'Invalid OAuth access token.',
@@ -73,22 +73,32 @@ describe('InstagramClient', () => {
 
       await expect(client.searchHashtag('matcha')).rejects.toThrow(MetaApiError);
       await expect(client.searchHashtag('matcha')).rejects.toMatchObject({
+        metaType: 'OAuthException',
         metaCode: 190,
         metaFbTraceId: 'trace-abc',
+        message: expect.stringContaining('OAuthException'),
       });
     });
 
-    it('throws MetaApiError on non-2xx HTTP with JSON error body', async () => {
+    it('throws MetaApiError on non-2xx HTTP with JSON error body and preserves properties', async () => {
       const errorBody = {
         error: {
-          message: 'Unsupported request.',
-          type: 'GraphMethodException',
-          code: 100,
+          message: "Please reduce the amount of data you're asking for, then retry your request",
+          type: 'OAuthException',
+          code: 1,
+          fbtrace_id: 'trace-xyz-123',
         },
       };
       globalThis.fetch = mockFetchOk(errorBody, 400) as unknown as typeof fetch;
 
       await expect(client.searchHashtag('matcha')).rejects.toThrow(MetaApiError);
+      await expect(client.searchHashtag('matcha')).rejects.toMatchObject({
+        statusCode: 400,
+        metaType: 'OAuthException',
+        metaCode: 1,
+        metaFbTraceId: 'trace-xyz-123',
+        message: expect.stringContaining('Please reduce the amount of data'),
+      });
     });
 
     it('throws MetaApiError when the response body is not valid JSON', async () => {
@@ -159,7 +169,7 @@ describe('InstagramClient', () => {
   // ── getTopMedia / getRecentMedia ──────────────────────────────────────────
 
   describe('getTopMedia', () => {
-    it('calls the correct endpoint and returns media list', async () => {
+    it('calls the correct endpoint and returns media list with reduced default fields and limit 10', async () => {
       const fakeResponse = { data: [{ id: 'm1', media_type: 'IMAGE' }], paging: {} };
       globalThis.fetch = mockFetchOk(fakeResponse) as unknown as typeof fetch;
 
@@ -169,11 +179,15 @@ describe('InstagramClient', () => {
       const calledUrl = (globalThis.fetch as ReturnType<typeof jest.fn>).mock
         .calls[0]?.[0] as string;
       expect(calledUrl).toContain('17841583865247128/top_media');
+      expect(calledUrl).toContain('limit=10');
+      expect(calledUrl).toContain(
+        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption',
+      );
     });
   });
 
   describe('getRecentMedia', () => {
-    it('calls the correct endpoint and returns media list', async () => {
+    it('calls the correct endpoint and returns media list with reduced default fields and limit 10', async () => {
       const fakeResponse = { data: [{ id: 'm2', media_type: 'VIDEO' }] };
       globalThis.fetch = mockFetchOk(fakeResponse) as unknown as typeof fetch;
 
@@ -183,6 +197,108 @@ describe('InstagramClient', () => {
       const calledUrl = (globalThis.fetch as ReturnType<typeof jest.fn>).mock
         .calls[0]?.[0] as string;
       expect(calledUrl).toContain('17841583865247128/recent_media');
+      expect(calledUrl).toContain('limit=10');
+      expect(calledUrl).toContain(
+        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption',
+      );
+    });
+  });
+
+  // ── fetchNextPage ─────────────────────────────────────────────────────────
+
+  describe('fetchNextPage', () => {
+    const nextUrl =
+      'https://graph.facebook.com/v24.0/17841583865247128/top_media?after=AQ...&access_token=secret';
+
+    it('fetches and returns parsed response on success', async () => {
+      const fakeResponse = {
+        data: [{ id: 'm3', media_type: 'IMAGE' }],
+        paging: { cursors: { after: 'next_cursor' } },
+      };
+      globalThis.fetch = mockFetchOk(fakeResponse) as unknown as typeof fetch;
+
+      const result = await client.fetchNextPage<typeof fakeResponse>(nextUrl);
+
+      expect(result).toEqual(fakeResponse);
+      expect(globalThis.fetch).toHaveBeenCalledWith(nextUrl);
+    });
+
+    it('throws MetaApiError with type, code, and fbtrace_id when Meta returns an error response body', async () => {
+      const errorBody = {
+        error: {
+          message: 'Error validating access token: Session has expired.',
+          type: 'OAuthException',
+          code: 190,
+          fbtrace_id: 'fb-trace-123',
+        },
+      };
+      globalThis.fetch = mockFetchOk(errorBody, 200) as unknown as typeof fetch;
+
+      await expect(client.fetchNextPage(nextUrl)).rejects.toThrow(MetaApiError);
+      await expect(client.fetchNextPage(nextUrl)).rejects.toMatchObject({
+        metaType: 'OAuthException',
+        metaCode: 190,
+        metaFbTraceId: 'fb-trace-123',
+        message: expect.stringContaining('OAuthException'),
+      });
+    });
+
+    it('throws MetaApiError on non-2xx HTTP error', async () => {
+      const errorBody = {
+        error: {
+          message: 'Rate limit exceeded.',
+          type: 'OAuthException',
+          code: 4,
+          fbtrace_id: 'fb-trace-456',
+        },
+      };
+      globalThis.fetch = mockFetchOk(errorBody, 429) as unknown as typeof fetch;
+
+      await expect(client.fetchNextPage(nextUrl)).rejects.toThrow(MetaApiError);
+      await expect(client.fetchNextPage(nextUrl)).rejects.toMatchObject({
+        statusCode: 429,
+        metaType: 'OAuthException',
+        metaCode: 4,
+        metaFbTraceId: 'fb-trace-456',
+      });
+    });
+
+    it('throws MetaApiError on network failure', async () => {
+      globalThis.fetch = mockFetchNetworkError(
+        'Connection reset by peer',
+      ) as unknown as typeof fetch;
+
+      await expect(client.fetchNextPage(nextUrl)).rejects.toThrow(MetaApiError);
+      await expect(client.fetchNextPage(nextUrl)).rejects.toMatchObject({
+        statusCode: undefined,
+      });
+    });
+
+    it('throws MetaApiError on non-JSON response', async () => {
+      globalThis.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        json: jest.fn().mockRejectedValue(new SyntaxError('Bad Gateway HTML')),
+      }) as unknown as typeof fetch;
+
+      await expect(client.fetchNextPage(nextUrl)).rejects.toThrow(MetaApiError);
+      await expect(client.fetchNextPage(nextUrl)).rejects.toMatchObject({
+        statusCode: 502,
+        message: expect.stringContaining('non-JSON'),
+      });
+    });
+
+    it('does NOT leak the nextUrl or access_token in error messages', async () => {
+      globalThis.fetch = mockFetchNetworkError('Network down') as unknown as typeof fetch;
+
+      try {
+        await client.fetchNextPage(nextUrl);
+        expect(true).toBe(false);
+      } catch (err) {
+        expect(err).toBeInstanceOf(MetaApiError);
+        expect((err as Error).message).not.toContain('secret');
+        expect((err as Error).message).not.toContain(nextUrl);
+      }
     });
   });
 });

@@ -3,12 +3,13 @@
  */
 export interface MetaErrorDetail {
   message: string;
-  type: string;
-  code: number;
+  type?: string;
+  code?: number;
   fbtrace_id?: string;
   error_subcode?: number;
   error_user_title?: string;
   error_user_msg?: string;
+  is_transient?: boolean;
 }
 
 /**

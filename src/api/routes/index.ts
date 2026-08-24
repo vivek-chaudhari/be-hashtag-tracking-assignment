@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import healthRouter from './health.route.js';
+import hashtagRouter from './hashtag.route.js';
 
 const router = Router();
 
-router.use('/health', healthRouter);
+router.use('/hashtags', hashtagRouter);
 
 export default router;

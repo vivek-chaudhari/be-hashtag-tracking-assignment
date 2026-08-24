@@ -2,6 +2,7 @@ export interface AwsConfig {
   region: string;
   s3Bucket: string;
   sqsQueueUrl: string;
+  mediaUploadQueueUrl?: string;
   accessKey: string;
   secretKey: string;
 }

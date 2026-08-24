@@ -17,6 +17,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit",
+    "worker:hashtag-sync": "tsx src/workers/index.ts",
+    "worker:media-upload": "tsx src/workers/media-upload.ts",
     "prepare": "husky",
     "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
     "test:coverage": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage"

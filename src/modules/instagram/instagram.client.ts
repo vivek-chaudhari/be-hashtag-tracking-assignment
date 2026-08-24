@@ -6,12 +6,11 @@ import type {
 } from './instagram.types.js';
 import { MetaApiError, MetaConfigError } from './instagram.errors.js';
 
-/** Default fields requested for media objects. */
-const DEFAULT_MEDIA_FIELDS =
-  'id,media_type,timestamp,permalink,media_url,caption,like_count,comments_count';
+/** Default fields requested for media objects (temporarily reduced to avoid rate/data limit errors). */
+const DEFAULT_MEDIA_FIELDS = 'id,media_type,timestamp,permalink,media_url,caption';
 
-/** Default page size for media requests. */
-const DEFAULT_MEDIA_LIMIT = 25;
+/** Default page size for media requests (temporarily set to 10). */
+const DEFAULT_MEDIA_LIMIT = 10;
 
 /**
  * Thin HTTP client for the Meta (Instagram) Graph API.
@@ -28,6 +27,7 @@ export class InstagramClient {
    * @param accessTokenFn - Thunk that returns the Meta access token.
    * @param userIdFn - Thunk that returns the Meta user ID.
    * @param apiVersion - Graph API version string (e.g. "v24.0").
+   * @param apiUrl - Base Graph API URL (default: "https://graph.facebook.com").
    */
   constructor(
     private readonly accessTokenFn: () => string,
@@ -103,13 +103,38 @@ export class InstagramClient {
     return this.request<MediaListResponse>(`${this.baseUrl}/${hashtagId}/recent_media`, params);
   }
 
+  /**
+   * Follows a `paging.next` URL returned by Meta verbatim.
+   *
+   * The URL already contains all required query parameters (including the access token),
+   * so it is fetched directly without modification or token re-attachment.
+   * The URL is NEVER logged or included in thrown error messages.
+   *
+   * @param nextUrl - The full `paging.next` URL provided by Meta.
+   * @returns Parsed JSON response body typed as T.
+   * @throws {MetaApiError} On network errors, non-2xx HTTP responses, or Meta error bodies.
+   */
+  public async fetchNextPage<T>(nextUrl: string): Promise<T> {
+    let response: Response;
+    console.log('nextpage', nextUrl);
+    try {
+      response = await fetch(nextUrl);
+    } catch (networkError) {
+      throw new MetaApiError(
+        `Network error calling Meta API paging endpoint: ${String(networkError)}`,
+      );
+    }
+
+    return this.handleResponse<T>(response, 'paging endpoint');
+  }
+
   // ----------------------------------------------------------------
   // Internal helpers
   // ----------------------------------------------------------------
 
   /**
-   * Core HTTP fetch wrapper. Appends `access_token` as a query parameter,
-   * parses the response as JSON, and surfaces Meta API errors as `MetaApiError`.
+   * Core HTTP fetch wrapper for parameterized endpoints. Appends `access_token`
+   * as a query parameter, parses the response as JSON, and surfaces Meta API errors as `MetaApiError`.
    *
    * The full URL (which contains the token) is NEVER included in thrown errors.
    *
@@ -127,6 +152,9 @@ export class InstagramClient {
     url.searchParams.set('access_token', accessToken);
 
     let response: Response;
+    const startedAt = Date.now();
+
+    console.debug(`Calling Meta API: ${url}`);
     try {
       response = await fetch(url.toString());
     } catch (networkError) {
@@ -135,28 +163,51 @@ export class InstagramClient {
       );
     }
 
+    const durationMs = Date.now() - startedAt;
+
+    console.debug(`✓ Meta API request completed in ${durationMs}ms: ${baseEndpoint}`);
+
+    return this.handleResponse<T>(response, `endpoint "${baseEndpoint}"`);
+  }
+
+  /**
+   * Common response handler for all Meta API HTTP responses.
+   * Parses JSON, inspects for Meta error bodies, validates HTTP status,
+   * and maps failures to `MetaApiError`.
+   *
+   * @param response - The HTTP Response object from native fetch.
+   * @param contextLabel - Safe descriptor for error messages (never containing secrets).
+   * @returns Parsed response body typed as T.
+   * @throws {MetaApiError} On non-JSON bodies, Meta error bodies, or non-2xx status codes.
+   */
+  private async handleResponse<T>(response: Response, contextLabel: string): Promise<T> {
     let body: unknown;
     try {
       body = await response.json();
     } catch {
       throw new MetaApiError(
-        `Meta API returned a non-JSON response for endpoint "${baseEndpoint}" (HTTP ${response.status}).`,
+        `Meta API returned a non-JSON response for ${contextLabel} (HTTP ${response.status}).`,
         response.status,
       );
     }
 
-    // Meta may return HTTP 200 with an error body — check for it first
+    // Meta may return HTTP 200 with an error body or non-2xx with an error body
     if (isMetaErrorBody(body)) {
-      throw new MetaApiError(
-        `Meta API error [${body.error.type}]: ${body.error.message}`,
-        response.status,
-        body.error,
-      );
+      const err = body.error;
+      const errorParts: string[] = [];
+      if (err.type) errorParts.push(`type: ${err.type}`);
+      if (err.code !== undefined) errorParts.push(`code: ${err.code}`);
+      if (err.fbtrace_id) errorParts.push(`fbtrace_id: ${err.fbtrace_id}`);
+
+      const errorMeta = errorParts.length > 0 ? ` [${errorParts.join(', ')}]` : '';
+      const errorMessage = err.message || 'Unknown Meta API error';
+
+      throw new MetaApiError(`Meta API error${errorMeta}: ${errorMessage}`, response.status, err);
     }
 
     if (!response.ok) {
       throw new MetaApiError(
-        `Meta API returned HTTP ${response.status} for endpoint "${baseEndpoint}".`,
+        `Meta API returned HTTP ${response.status} for ${contextLabel}.`,
         response.status,
       );
     }
@@ -206,7 +257,8 @@ function isMetaErrorBody(value: unknown): value is MetaErrorBody {
     typeof value === 'object' &&
     value !== null &&
     'error' in value &&
-    typeof (value as MetaErrorBody).error === 'object'
+    typeof (value as MetaErrorBody).error === 'object' &&
+    (value as MetaErrorBody).error !== null
   );
 }
 

@@ -106,23 +106,27 @@ export class ConfigService {
   // --- AWS Getters ---
 
   public getAwsRegion(): string {
-    return this.get('AWS_REGION', 'us-east-1');
+    return this.get('AWS_REGION', 'ap-south-1');
   }
 
   public getAwsS3Bucket(): string {
-    return this.get('AWS_S3_BUCKET', '');
+    return this.get('S3_BUCKET_NAME') || this.get('AWS_S3_BUCKET', '');
   }
 
   public getAwsSqsQueueUrl(): string {
-    return this.get('AWS_SQS_QUEUE_URL', '');
+    return this.get('SQS_QUEUE_URL') || this.get('AWS_SQS_QUEUE_URL', '');
+  }
+
+  public getMediaUploadQueueUrl(): string {
+    return this.get('MEDIA_UPLOAD_QUEUE_URL') || this.get('AWS_MEDIA_UPLOAD_QUEUE_URL', '');
   }
 
   public getAwsAccessKey(): string {
-    return this.get('AWS_ACCESS_KEY', '');
+    return this.get('AWS_ACCESS_KEY_ID') || this.get('AWS_ACCESS_KEY', '');
   }
 
   public getAwsSecretKey(): string {
-    return this.get('AWS_SECRET_KEY', '');
+    return this.get('AWS_SECRET_ACCESS_KEY') || this.get('AWS_SECRET_KEY', '');
   }
 
   public getAwsConfig(): AwsConfig {
@@ -130,6 +134,7 @@ export class ConfigService {
       region: this.getAwsRegion(),
       s3Bucket: this.getAwsS3Bucket(),
       sqsQueueUrl: this.getAwsSqsQueueUrl(),
+      mediaUploadQueueUrl: this.getMediaUploadQueueUrl(),
       accessKey: this.getAwsAccessKey(),
       secretKey: this.getAwsSecretKey(),
     };

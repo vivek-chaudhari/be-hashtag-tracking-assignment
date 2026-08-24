@@ -11,8 +11,14 @@ export class MetaApiError extends Error {
   /** Meta-specific error code from the response body, if available. */
   public readonly metaCode: number | undefined;
 
+  /** Meta error type (e.g. "OAuthException", "GraphMethodException"), if available. */
+  public readonly metaType: string | undefined;
+
   /** Meta's fb trace ID for debugging, if available. */
   public readonly metaFbTraceId: string | undefined;
+
+  /** Full parsed Meta error body, if available. */
+  public readonly metaErrorBody: MetaErrorBody['error'] | undefined;
 
   /**
    * @param message - Human-readable error description (must NOT contain access tokens).
@@ -24,7 +30,9 @@ export class MetaApiError extends Error {
     this.name = 'MetaApiError';
     this.statusCode = statusCode;
     this.metaCode = metaErrorBody?.code;
+    this.metaType = metaErrorBody?.type;
     this.metaFbTraceId = metaErrorBody?.fbtrace_id;
+    this.metaErrorBody = metaErrorBody;
 
     // Maintains proper prototype chain in transpiled ES5+
     Object.setPrototypeOf(this, new.target.prototype);
