@@ -1,8 +1,10 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 import { config } from '../config/env.js';
+import { createLogger } from '../common/logger.js';
 import * as schema from './schema.js';
 
+const logger = createLogger('Database');
 const { Pool } = pg;
 
 export const pool = new Pool({
@@ -20,7 +22,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     client.release();
     return true;
   } catch (error) {
-    console.error('Database connection failed:', error);
+    logger.error('Database connection failed', error);
     return false;
   }
 }

@@ -5,13 +5,13 @@ import { pool, checkDatabaseConnection } from './db/connection.js';
 const app = createApp();
 
 const server = app.listen(config.port, async () => {
-  console.log(`🚀 Server running in ${config.nodeEnv} mode on http://localhost:${config.port}`);
+  console.log(`Server running in ${config.nodeEnv} mode on http://localhost:${config.port}`);
 
   const isDbReady = await checkDatabaseConnection();
   if (isDbReady) {
-    console.log('📦 Connected to PostgreSQL database successfully via Drizzle ORM');
+    console.log('Connected to PostgreSQL database successfully via Drizzle ORM');
   } else {
-    console.warn('⚠️ Warning: Database connection could not be established');
+    console.warn('Warning: Database connection could not be established');
   }
 });
 

@@ -8,6 +8,7 @@ export interface AwsConfig {
 
 export interface MetaConfig {
   graphApiVersion: string;
+  graphApiBaseUrl: string;
   userId: string;
   accessToken: string;
   hashtag: string;

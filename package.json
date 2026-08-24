@@ -7,7 +7,7 @@
   "author": "Vivek Chaudhari",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
@@ -17,7 +17,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1116.0",
@@ -30,14 +32,17 @@
   "devDependencies": {
     "@eslint/js": "^9.9.1",
     "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.5.4",
     "@types/pg": "^8.11.8",
     "drizzle-kit": "^0.24.2",
     "eslint": "^9.9.1",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^9.1.5",
+    "jest": "^30.4.2",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3",
+    "ts-jest": "^29.4.12",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.4.0"

@@ -18,4 +18,11 @@ export default tseslint.config(
       ],
     },
   },
+  // Relax rules inside test files
+  {
+    files: ['**/__tests__/**/*.ts', '**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
 );

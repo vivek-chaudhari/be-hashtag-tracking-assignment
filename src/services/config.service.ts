@@ -141,6 +141,10 @@ export class ConfigService {
     return this.get('META_GRAPH_API_VERSION', 'v24.0');
   }
 
+  public getMetaGraphApiBaseUrl(): string {
+    return this.get('META_GRAPH_API_BASE_URL', 'https://graph.facebook.com');
+  }
+
   public getMetaUserId(): string {
     return this.get('META_USER_ID', '');
   }
@@ -156,6 +160,7 @@ export class ConfigService {
   public getMetaConfig(): MetaConfig {
     return {
       graphApiVersion: this.getMetaGraphApiVersion(),
+      graphApiBaseUrl: this.getMetaGraphApiBaseUrl(),
       userId: this.getMetaUserId(),
       accessToken: this.getMetaAccessToken(),
       hashtag: this.getHashtag(),
