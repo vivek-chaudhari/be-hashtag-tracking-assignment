@@ -3,7 +3,10 @@ import { jest } from '@jest/globals';
 import { MediaFetcher, MEDIA_FETCH_LIMIT } from '../media.fetcher.js';
 import type { InstagramClient } from '../instagram.client.js';
 import { MetaApiError } from '../instagram.errors.js';
-import type { MediaListResponse, MetaMediaItem } from '../instagram.types.js';
+import type {
+  MediaListResponse,
+  MetaMediaItem,
+} from '../../../common/interfaces/instagram.interface.js';
 
 // ----------------------------------------------------------------
 // Helpers

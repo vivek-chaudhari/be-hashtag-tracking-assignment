@@ -1,9 +1,9 @@
 import type { Message } from '@aws-sdk/client-sqs';
 import type { SqsService } from '../services/queue/sqs.service.js';
-import type { MediaUploadService } from '../modules/media/media.upload.service.js';
-import { isUploadMediaMessage, type UploadMediaMessage } from '../services/queue/queue.types.js';
+import type { MediaUploadService } from '../modules/media/upload.service.js';
+import { isUploadMediaMessage, type UploadMediaMessage } from '../common/utils/queue.utils.js';
 import { createLogger } from '../common/logger.js';
-import { sanitizeErrorMessage } from '../modules/media/media.ingestion.service.js';
+import { sanitizeErrorMessage } from '../modules/media/ingestion.service.js';
 import { configService } from '../services/config.service.js';
 
 const logger = createLogger('MediaUploadWorker');
@@ -166,6 +166,6 @@ export class MediaUploadWorker {
 // Default singleton wired to production dependencies
 // ----------------------------------------------------------------
 import { sqsService } from '../services/queue/sqs.service.js';
-import { mediaUploadService } from '../modules/media/media.upload.service.js';
+import { mediaUploadService } from '../modules/media/upload.service.js';
 
 export const mediaUploadWorker = new MediaUploadWorker(sqsService, mediaUploadService);

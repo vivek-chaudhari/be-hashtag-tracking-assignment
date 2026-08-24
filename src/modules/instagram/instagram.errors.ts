@@ -1,4 +1,4 @@
-import type { MetaErrorBody } from './instagram.types.js';
+import type { MetaErrorBody } from '../../common/interfaces/instagram.interface.js';
 
 /**
  * Thrown whenever the Meta Graph API returns a non-2xx status or an error body.

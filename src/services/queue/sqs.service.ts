@@ -6,7 +6,7 @@ import {
   type Message,
 } from '@aws-sdk/client-sqs';
 import { configService } from '../config.service.js';
-import type { QueueMessage } from './queue.types.js';
+import type { QueueMessage } from '../../common/utils/queue.utils.js';
 import { createLogger } from '../../common/logger.js';
 
 const logger = createLogger('SqsService');

@@ -1,7 +1,7 @@
 import { configService } from '../services/config.service.js';
+import type { LogLevel, LogMetadata } from './interfaces/logger.interface.js';
 
-/** Available log levels ordered by severity. */
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type { LogLevel, LogMetadata };
 
 const LEVELS: Record<LogLevel, number> = {
   debug: 0,

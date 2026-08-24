@@ -5,19 +5,14 @@ import type { Media, StorageStatus } from '../../db/schema.js';
 import { media } from '../../db/schema.js';
 import type * as schema from '../../db/schema.js';
 import { createLogger } from '../../common/logger.js';
-import { sanitizeErrorMessage } from './media.ingestion.service.js';
-import { getExtensionFromContentType } from './media.asset.service.js';
+import { sanitizeErrorMessage } from './ingestion.service.js';
+import { getExtensionFromContentType } from '../../common/utils/media.utils.js';
 
 const logger = createLogger('MediaUploadService');
 
-/**
- * Result returned by {@link MediaUploadService.uploadMedia}.
- */
-export interface MediaUploadResult {
-  success: boolean;
-  mediaId: string;
-  storageKey?: string;
-}
+import type { MediaUploadResult } from '../../common/interfaces/media.interface.js';
+
+export type { MediaUploadResult };
 
 /**
  * Generates a deterministic S3 key under the `media/` prefix using the media record's database UUID.

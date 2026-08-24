@@ -1,5 +1,5 @@
 /**
- * Represents a Meta Graph API error response body.
+ * Represents a Meta Graph API error response detail object.
  */
 export interface MetaErrorDetail {
   message: string;
@@ -28,7 +28,6 @@ export interface HashtagSearchResponse {
 
 /**
  * A single media item returned from top_media / recent_media.
- * All fields except `id` are optional because Meta may omit any of them.
  */
 export interface MetaMediaItem {
   id: string;
@@ -70,8 +69,22 @@ export interface MediaListResponse {
  * Options accepted when fetching media from Meta.
  */
 export interface FetchMediaOptions {
-  /** Number of items per page (default 25). */
+  /** Number of items per page (default 10). */
   limit?: number;
   /** Comma-separated list of fields to request. */
   fields?: string;
+}
+
+/**
+ * Feed type for hashtag media fetching: 'top' or 'recent'.
+ */
+export type MediaFeedType = 'top' | 'recent';
+
+/**
+ * Result returned by MediaFetcher.
+ */
+export interface MediaFetchResult {
+  items: MetaMediaItem[];
+  pagesFetched: number;
+  truncated?: boolean;
 }

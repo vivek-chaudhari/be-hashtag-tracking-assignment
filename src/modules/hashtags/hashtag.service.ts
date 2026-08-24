@@ -10,14 +10,6 @@ import { normalizeHashtag, isUniqueViolation } from '../../common/utils/hashtag.
 
 const logger = createLogger('HashtagService');
 
-// Helpers are exported from '../../common/utils/hashtag.utils.js'
-// and re-exported here for backwards compatibility.
-export { normalizeHashtag } from '../../common/utils/hashtag.utils.js';
-
-// ----------------------------------------------------------------
-// Service
-// ----------------------------------------------------------------
-
 /**
  * Handles all domain logic for hashtag initialization.
  *
@@ -33,10 +25,6 @@ export class HashtagService {
     private readonly client: InstagramClient,
     private readonly db: NodePgDatabase<typeof schema>,
   ) {}
-
-  // ----------------------------------------------------------------
-  // Public API
-  // ----------------------------------------------------------------
 
   /**
    * Idempotently initializes a hashtag record in the database.
@@ -84,10 +72,6 @@ export class HashtagService {
     // ── Step 3: insert (handling concurrent race conditions) ────────
     return this.insertWithRaceGuard(normalized, metaHashtagId);
   }
-
-  // ----------------------------------------------------------------
-  // Private helpers
-  // ----------------------------------------------------------------
 
   /**
    * Fetches the Meta hashtag ID for the given name via the Graph API.

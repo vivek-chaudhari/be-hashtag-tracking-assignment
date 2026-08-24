@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import type { MediaFetcher, MediaFeedType } from '../instagram/media.fetcher.js';
-import type { MetaMediaItem } from '../instagram/instagram.types.js';
+import type { MediaFetcher } from '../instagram/media.fetcher.js';
+import type { MetaMediaItem, MediaFeedType } from '../../common/interfaces/instagram.interface.js';
 import type { SqsService } from '../../services/queue/sqs.service.js';
-import type { Hashtag, NewMedia, SyncRun, SyncType, SyncStatus } from '../../db/schema.js';
+import type { Hashtag, NewMedia, SyncRun, SyncType } from '../../db/schema.js';
 import { hashtags, media, syncRuns } from '../../db/schema.js';
 import type * as schema from '../../db/schema.js';
 import { createLogger } from '../../common/logger.js';
@@ -11,19 +11,9 @@ import { configService } from '../../services/config.service.js';
 
 const logger = createLogger('MediaIngestionService');
 
-/**
- * Result returned after a media sync execution.
- */
-export interface SyncResult {
-  syncRunId: string;
-  hashtagId: string;
-  syncType: SyncType;
-  status: SyncStatus;
-  itemsFetched: number;
-  itemsCreated: number;
-  itemsSkipped: number;
-  error?: string | null;
-}
+import type { SyncResult } from '../../common/interfaces/media.interface.js';
+
+export type { SyncResult };
 
 /**
  * Sanitizes an error message by stripping access tokens or sensitive URL parameters.

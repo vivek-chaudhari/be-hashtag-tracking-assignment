@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { jest } from '@jest/globals';
 import { SqsService } from '../sqs.service.js';
 import type { SQSClient } from '@aws-sdk/client-sqs';
-import type { QueueMessage } from '../queue.types.js';
+import type { QueueMessage } from '../../../common/utils/queue.utils.js';
 
 describe('SqsService', () => {
   let mockSqsClient: { send: ReturnType<typeof jest.fn> };

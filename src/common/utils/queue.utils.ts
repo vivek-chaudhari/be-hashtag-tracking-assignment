@@ -1,28 +1,10 @@
-/**
- * Message payload for triggering a hashtag media sync job.
- */
-export type HashtagSyncMessage =
-  | {
-      type: 'SYNC_RECENT_HASHTAG_MEDIA';
-      hashtag: string;
-    }
-  | {
-      type: 'SYNC_TOP_HASHTAG_MEDIA';
-      hashtag: string;
-    };
+import type {
+  HashtagSyncMessage,
+  UploadMediaMessage,
+  QueueMessage,
+} from '../interfaces/queue.interface.js';
 
-/**
- * Message payload for triggering an individual S3 media asset upload.
- */
-export type UploadMediaMessage = {
-  type: 'UPLOAD_MEDIA';
-  mediaId: string;
-};
-
-/**
- * Union of all supported SQS message payload types.
- */
-export type QueueMessage = HashtagSyncMessage | UploadMediaMessage;
+export type { HashtagSyncMessage, UploadMediaMessage, QueueMessage };
 
 /**
  * Type guard to validate whether an unknown object conforms to {@link HashtagSyncMessage}.

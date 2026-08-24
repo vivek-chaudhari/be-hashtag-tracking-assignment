@@ -1,10 +1,10 @@
 import type { Message } from '@aws-sdk/client-sqs';
 import type { SqsService } from '../services/queue/sqs.service.js';
-import type { MediaIngestionService } from '../modules/media/media.ingestion.service.js';
+import type { MediaIngestionService } from '../modules/media/ingestion.service.js';
 import type { HashtagService } from '../modules/hashtags/hashtag.service.js';
-import { isHashtagSyncMessage, type HashtagSyncMessage } from '../services/queue/queue.types.js';
+import { isHashtagSyncMessage, type HashtagSyncMessage } from '../common/utils/queue.utils.js';
 import { createLogger } from '../common/logger.js';
-import { sanitizeErrorMessage } from '../modules/media/media.ingestion.service.js';
+import { sanitizeErrorMessage } from '../modules/media/ingestion.service.js';
 
 const logger = createLogger('HashtagSyncWorker');
 
@@ -161,7 +161,7 @@ export class HashtagSyncWorker {
 // Default singleton wired to production dependencies
 // ----------------------------------------------------------------
 import { sqsService } from '../services/queue/sqs.service.js';
-import { mediaIngestionService } from '../modules/media/media.ingestion.service.js';
+import { mediaIngestionService } from '../modules/media/ingestion.service.js';
 import { hashtagService } from '../modules/hashtags/hashtag.service.js';
 
 export const hashtagSyncWorker = new HashtagSyncWorker(

@@ -1,5 +1,11 @@
 import type { InstagramClient } from './instagram.client.js';
-import type { MetaMediaItem, MediaListResponse, FetchMediaOptions } from './instagram.types.js';
+import type {
+  MetaMediaItem,
+  MediaListResponse,
+  FetchMediaOptions,
+  MediaFeedType,
+  MediaFetchResult,
+} from '../../common/interfaces/instagram.interface.js';
 import { MetaApiError } from './instagram.errors.js';
 import { createLogger } from '../../common/logger.js';
 
@@ -7,19 +13,6 @@ const logger = createLogger('MediaFetcher');
 
 /** Maximum number of media items fetched across all pages in a single run. */
 export const MEDIA_FETCH_LIMIT = 500;
-
-/** Media type selector: top performing or most recent. */
-export type MediaFeedType = 'top' | 'recent';
-
-/**
- * Result returned by {@link MediaFetcher.fetchMedia}.
- */
-export interface MediaFetchResult {
-  /** All collected media items, capped at {@link MEDIA_FETCH_LIMIT}. */
-  items: MetaMediaItem[];
-  /** Number of pages retrieved from the Meta API. */
-  pagesFetched: number;
-}
 
 /**
  * Orchestrates paginated media retrieval from the Meta Graph API for a hashtag,

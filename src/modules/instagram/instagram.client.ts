@@ -3,14 +3,15 @@ import type {
   MediaListResponse,
   MetaErrorBody,
   FetchMediaOptions,
-} from './instagram.types.js';
+} from '../../common/interfaces/instagram.interface.js';
 import { MetaApiError, MetaConfigError } from './instagram.errors.js';
 
 /** Default fields requested for media objects (temporarily reduced to avoid rate/data limit errors). */
-const DEFAULT_MEDIA_FIELDS = 'id,media_type,timestamp,permalink,media_url,caption';
+const DEFAULT_MEDIA_FIELDS =
+  'id,media_type,timestamp,permalink,media_url,caption,like_count,comments_count';
 
-/** Default page size for media requests (temporarily set to 10). */
-const DEFAULT_MEDIA_LIMIT = 10;
+/** Default page size for media requests (temporarily set to 5 to overcome META API ISSUE). */
+const DEFAULT_MEDIA_LIMIT = 5;
 
 /**
  * Thin HTTP client for the Meta (Instagram) Graph API.
@@ -37,10 +38,6 @@ export class InstagramClient {
   ) {
     this.baseUrl = `${apiUrl}/${apiVersion}`;
   }
-
-  // ----------------------------------------------------------------
-  // Public API methods
-  // ----------------------------------------------------------------
 
   /**
    * Search for a hashtag by name and return the Meta hashtag ID.
@@ -116,7 +113,6 @@ export class InstagramClient {
    */
   public async fetchNextPage<T>(nextUrl: string): Promise<T> {
     let response: Response;
-    console.log('nextpage', nextUrl);
     try {
       response = await fetch(nextUrl);
     } catch (networkError) {
@@ -127,10 +123,6 @@ export class InstagramClient {
 
     return this.handleResponse<T>(response, 'paging endpoint');
   }
-
-  // ----------------------------------------------------------------
-  // Internal helpers
-  // ----------------------------------------------------------------
 
   /**
    * Core HTTP fetch wrapper for parameterized endpoints. Appends `access_token`
@@ -154,7 +146,6 @@ export class InstagramClient {
     let response: Response;
     const startedAt = Date.now();
 
-    console.debug(`Calling Meta API: ${url}`);
     try {
       response = await fetch(url.toString());
     } catch (networkError) {
@@ -241,10 +232,6 @@ export class InstagramClient {
     return userId;
   }
 }
-
-// ----------------------------------------------------------------
-// Type guard
-// ----------------------------------------------------------------
 
 /**
  * Type guard to check if an unknown value is a Meta error response body.
