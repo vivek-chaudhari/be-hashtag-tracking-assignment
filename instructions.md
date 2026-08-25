@@ -86,12 +86,15 @@ This separation prevents media download/upload latency from blocking the Meta in
 - **Object Storage:** Amazon S3
 - **External API:** Meta Graph API
 - **Testing:** Jest
+- **Linting:** ESLint
+- **Husky:** Pre-commit hooks
 
 # Prerequisites
 
 - **Node.js:** v20.x or higher
 - **PostgreSQL:** v14 or higher, running locally or in the cloud
 - **AWS Account:** Access to:
+  - EventBridge: Create a rule that triggers every 3 hours and sends a message to the SQS queue `matcha-hashtag-sync`
   - SQS queue: `matcha-hashtag-sync`
   - SQS queue: `matcha-media-upload`
   - S3 bucket: `saral-hashtag-media`
@@ -240,8 +243,9 @@ Example:
 GET /api/hashtags?page=1&limit=20
 ```
 
+Api Response:
+
 ```text
-Api Response
 {
   "message": "Hashtag(s) fetched successfully",
   "result": {
