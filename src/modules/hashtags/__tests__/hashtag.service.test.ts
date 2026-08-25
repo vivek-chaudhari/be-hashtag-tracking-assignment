@@ -22,9 +22,9 @@ const FAKE_HASHTAG: Hashtag = {
 // Factories
 // ----------------------------------------------------------------
 
-function makeClient(overrides: Partial<InstagramClient> = {}): InstagramClient {
+function makeClient(overrides: Record<string, unknown> = {}): InstagramClient {
   return {
-    searchHashtag: jest.fn().mockResolvedValue({ data: [{ id: '17841583865247128' }] }),
+    searchHashtag: jest.fn().mockResolvedValue({ data: [{ id: '17841583865247128' }] } as never),
     getTopMedia: jest.fn(),
     getRecentMedia: jest.fn(),
     ...overrides,
@@ -43,19 +43,19 @@ function makeDbMock(
     select: jest.fn().mockReturnValue({
       from: jest.fn().mockReturnValue({
         where: jest.fn().mockReturnValue({
-          limit: jest.fn().mockResolvedValue(opts.selectResult ?? []),
+          limit: jest.fn().mockResolvedValue((opts.selectResult ?? []) as never),
         }),
       }),
     }),
     insert: opts.insertThrow
       ? jest.fn().mockReturnValue({
           values: jest.fn().mockReturnValue({
-            returning: jest.fn().mockRejectedValue(opts.insertThrow),
+            returning: jest.fn().mockRejectedValue(opts.insertThrow as never),
           }),
         })
       : jest.fn().mockReturnValue({
           values: jest.fn().mockReturnValue({
-            returning: jest.fn().mockResolvedValue(opts.insertResult ?? [FAKE_HASHTAG]),
+            returning: jest.fn().mockResolvedValue((opts.insertResult ?? [FAKE_HASHTAG]) as never),
           }),
         }),
   };
@@ -156,7 +156,7 @@ describe('HashtagService.initializeHashtag', () => {
 
   it('throws MetaApiError when Meta returns no hashtag ID', async () => {
     const noResultClient = makeClient({
-      searchHashtag: jest.fn().mockResolvedValue({ data: [] }),
+      searchHashtag: jest.fn().mockResolvedValue({ data: [] } as never),
     });
     const db = makeDbMock({ selectResult: [] });
     const service = new HashtagService(noResultClient, db as any);
@@ -178,8 +178,8 @@ describe('HashtagService.initializeHashtag', () => {
     // SELECT: first call returns [], second call (after the race) returns the row
     const selectLimitMock = jest
       .fn()
-      .mockResolvedValueOnce([]) // initial lookup → not found
-      .mockResolvedValueOnce([FAKE_HASHTAG]); // post-race re-fetch → found
+      .mockResolvedValueOnce([] as never) // initial lookup → not found
+      .mockResolvedValueOnce([FAKE_HASHTAG] as never); // post-race re-fetch → found
 
     const db = {
       select: jest.fn().mockReturnValue({
@@ -191,7 +191,7 @@ describe('HashtagService.initializeHashtag', () => {
       }),
       insert: jest.fn().mockReturnValue({
         values: jest.fn().mockReturnValue({
-          returning: jest.fn().mockRejectedValue(uniqueViolation),
+          returning: jest.fn().mockRejectedValue(uniqueViolation as never),
         }),
       }),
     };

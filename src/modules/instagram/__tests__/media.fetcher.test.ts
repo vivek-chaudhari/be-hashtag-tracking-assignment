@@ -29,12 +29,16 @@ function makePage(items: MetaMediaItem[], nextUrl?: string): MediaListResponse {
 }
 
 /** Creates a minimal InstagramClient mock with fetchNextPage support. */
-function makeClient(overrides: Partial<InstagramClient> = {}): InstagramClient {
+function makeClient(overrides: Record<string, unknown> = {}): InstagramClient {
   return {
     searchHashtag: jest.fn(),
-    getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25), 'https://meta/page2')),
-    getRecentMedia: jest.fn().mockResolvedValue(makePage(makeItems(25), 'https://meta/page2')),
-    fetchNextPage: jest.fn().mockResolvedValue(makePage(makeItems(25))),
+    getTopMedia: jest
+      .fn()
+      .mockResolvedValue(makePage(makeItems(25), 'https://meta/page2') as never),
+    getRecentMedia: jest
+      .fn()
+      .mockResolvedValue(makePage(makeItems(25), 'https://meta/page2') as never),
+    fetchNextPage: jest.fn().mockResolvedValue(makePage(makeItems(25)) as never),
     ...overrides,
   } as unknown as InstagramClient;
 }
@@ -49,7 +53,7 @@ describe('MediaFetcher.fetchMedia', () => {
   it('returns items from a single-page response when paging.next is absent', async () => {
     const items = makeItems(10);
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(items)), // no nextUrl
+      getTopMedia: jest.fn().mockResolvedValue(makePage(items) as never), // no nextUrl
     });
     const fetcher = new MediaFetcher(mockClient);
 
@@ -69,11 +73,11 @@ describe('MediaFetcher.fetchMedia', () => {
     const page3Items = makeItems(15, 50);
 
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(page1Items, 'https://meta/page2')),
+      getTopMedia: jest.fn().mockResolvedValue(makePage(page1Items, 'https://meta/page2') as never),
       fetchNextPage: jest
         .fn()
-        .mockResolvedValueOnce(makePage(page2Items, 'https://meta/page3'))
-        .mockResolvedValueOnce(makePage(page3Items)), // page 3 has no next
+        .mockResolvedValueOnce(makePage(page2Items, 'https://meta/page3') as never)
+        .mockResolvedValueOnce(makePage(page3Items) as never), // page 3 has no next
     });
 
     const fetcher = new MediaFetcher(mockClient);
@@ -91,7 +95,7 @@ describe('MediaFetcher.fetchMedia', () => {
 
   it('stops pagination when paging.next is absent', async () => {
     const mockClient = makeClient({
-      getRecentMedia: jest.fn().mockResolvedValue(makePage(makeItems(5))), // no next
+      getRecentMedia: jest.fn().mockResolvedValue(makePage(makeItems(5)) as never), // no next
     });
     const fetcher = new MediaFetcher(mockClient);
 
@@ -107,7 +111,9 @@ describe('MediaFetcher.fetchMedia', () => {
   it(`stops at exactly ${MEDIA_FETCH_LIMIT} items across 20 pages of 25`, async () => {
     let page = 2;
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25, 0), 'https://meta/page2')),
+      getTopMedia: jest
+        .fn()
+        .mockResolvedValue(makePage(makeItems(25, 0), 'https://meta/page2') as never),
       fetchNextPage: jest.fn().mockImplementation(async () => {
         const isLast = page === 20;
         const startIdx = (page - 1) * 25;
@@ -133,7 +139,9 @@ describe('MediaFetcher.fetchMedia', () => {
   it('truncates the final page to stay within the 500-item cap', async () => {
     let page = 2;
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25, 0), 'https://meta/page2')),
+      getTopMedia: jest
+        .fn()
+        .mockResolvedValue(makePage(makeItems(25, 0), 'https://meta/page2') as never),
       fetchNextPage: jest.fn().mockImplementation(async () => {
         const isLast = page === 20;
         const startIdx = (page - 1) * 25;
@@ -159,7 +167,9 @@ describe('MediaFetcher.fetchMedia', () => {
 
   it('does not request subsequent pages if first page already contains 500 items', async () => {
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(500, 0), 'https://meta/page2')),
+      getTopMedia: jest
+        .fn()
+        .mockResolvedValue(makePage(makeItems(500, 0), 'https://meta/page2') as never),
     });
 
     const fetcher = new MediaFetcher(mockClient);
@@ -175,8 +185,8 @@ describe('MediaFetcher.fetchMedia', () => {
   it('detects repeated paging.next URL and throws MetaApiError without leaking the URL', async () => {
     const repeatedUrl = 'https://meta/loop-page?token=secret123';
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25, 0), repeatedUrl)),
-      fetchNextPage: jest.fn().mockResolvedValue(makePage(makeItems(25, 25), repeatedUrl)), // loops back
+      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25, 0), repeatedUrl) as never),
+      fetchNextPage: jest.fn().mockResolvedValue(makePage(makeItems(25, 25), repeatedUrl) as never), // loops back
     });
 
     const fetcher = new MediaFetcher(mockClient);
@@ -199,7 +209,7 @@ describe('MediaFetcher.fetchMedia', () => {
 
   it('calls getRecentMedia when feedType is "recent"', async () => {
     const mockClient = makeClient({
-      getRecentMedia: jest.fn().mockResolvedValue(makePage(makeItems(8))),
+      getRecentMedia: jest.fn().mockResolvedValue(makePage(makeItems(8)) as never),
     });
     const fetcher = new MediaFetcher(mockClient);
 
@@ -214,7 +224,7 @@ describe('MediaFetcher.fetchMedia', () => {
   it('propagates MetaApiError from the first page request', async () => {
     const apiError = new MetaApiError('Rate limit exceeded', 429);
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockRejectedValue(apiError),
+      getTopMedia: jest.fn().mockRejectedValue(apiError as never),
     });
     const fetcher = new MediaFetcher(mockClient);
 
@@ -229,8 +239,10 @@ describe('MediaFetcher.fetchMedia', () => {
   it('propagates MetaApiError thrown by client.fetchNextPage', async () => {
     const apiError = new MetaApiError('OAuth token expired on paging', 190);
     const mockClient = makeClient({
-      getTopMedia: jest.fn().mockResolvedValue(makePage(makeItems(25), 'https://meta/page2')),
-      fetchNextPage: jest.fn().mockRejectedValue(apiError),
+      getTopMedia: jest
+        .fn()
+        .mockResolvedValue(makePage(makeItems(25), 'https://meta/page2') as never),
+      fetchNextPage: jest.fn().mockRejectedValue(apiError as never),
     });
 
     const fetcher = new MediaFetcher(mockClient);

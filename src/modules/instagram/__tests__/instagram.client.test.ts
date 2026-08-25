@@ -21,13 +21,13 @@ function mockFetchOk(body: unknown, status = 200) {
   return jest.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
-    json: jest.fn().mockResolvedValue(body),
-  });
+    json: jest.fn().mockResolvedValue(body as never),
+  } as never);
 }
 
 /** Builds a fetch mock that rejects at the network level. */
 function mockFetchNetworkError(message = 'Network failure') {
-  return jest.fn().mockRejectedValue(new Error(message));
+  return jest.fn().mockRejectedValue(new Error(message) as never);
 }
 
 // ---------------------------------------------------------------------------
@@ -105,8 +105,8 @@ describe('InstagramClient', () => {
       globalThis.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 500,
-        json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token')),
-      }) as unknown as typeof fetch;
+        json: jest.fn().mockRejectedValue(new SyntaxError('Unexpected token') as never),
+      } as never) as unknown as typeof fetch;
 
       await expect(client.searchHashtag('matcha')).rejects.toThrow(MetaApiError);
       await expect(client.searchHashtag('matcha')).rejects.toMatchObject({ statusCode: 500 });
@@ -278,8 +278,8 @@ describe('InstagramClient', () => {
       globalThis.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 502,
-        json: jest.fn().mockRejectedValue(new SyntaxError('Bad Gateway HTML')),
-      }) as unknown as typeof fetch;
+        json: jest.fn().mockRejectedValue(new SyntaxError('Bad Gateway HTML') as never),
+      } as never) as unknown as typeof fetch;
 
       await expect(client.fetchNextPage(nextUrl)).rejects.toThrow(MetaApiError);
       await expect(client.fetchNextPage(nextUrl)).rejects.toMatchObject({

@@ -10,7 +10,7 @@ describe('SqsService', () => {
 
   beforeEach(() => {
     mockSqsClient = {
-      send: jest.fn().mockResolvedValue({ MessageId: 'msg-123', Messages: [] }),
+      send: jest.fn().mockResolvedValue({ MessageId: 'msg-123', Messages: [] } as never),
     };
     sqsService = new SqsService(
       mockSqsClient as unknown as SQSClient,

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { MediaUploadWorker } from '../media-upload.worker.js';
 import type { SqsService } from '../../services/queue/sqs.service.js';
-import type { MediaUploadService } from '../../modules/media/media.upload.service.js';
+import type { MediaUploadService } from '../../modules/media/upload.service.js';
 import type { Message } from '@aws-sdk/client-sqs';
 
 // ----------------------------------------------------------------

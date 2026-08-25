@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { jest } from '@jest/globals';
 import { HashtagSyncWorker } from '../hashtag-sync.worker.js';
 import type { SqsService } from '../../services/queue/sqs.service.js';
-import type { MediaIngestionService } from '../../modules/media/media.ingestion.service.js';
+import type { MediaIngestionService } from '../../modules/media/ingestion.service.js';
 import type { HashtagService } from '../../modules/hashtags/hashtag.service.js';
 import type { Hashtag } from '../../db/schema.js';
 import type { Message } from '@aws-sdk/client-sqs';
@@ -21,9 +21,9 @@ const FAKE_HASHTAG: Hashtag = {
 
 function makeSqsMock(): SqsService {
   return {
-    sendMessage: jest.fn().mockResolvedValue('msg-id-1'),
-    receiveMessages: jest.fn().mockResolvedValue([]),
-    deleteMessage: jest.fn().mockResolvedValue(undefined),
+    sendMessage: jest.fn().mockResolvedValue('msg-id-1' as never),
+    receiveMessages: jest.fn().mockResolvedValue([] as never),
+    deleteMessage: jest.fn().mockResolvedValue(undefined as never),
   } as unknown as SqsService;
 }
 
@@ -37,13 +37,13 @@ function makeMediaIngestionMock(): MediaIngestionService {
       itemsFetched: 10,
       itemsCreated: 10,
       itemsSkipped: 0,
-    }),
+    } as never),
   } as unknown as MediaIngestionService;
 }
 
 function makeHashtagServiceMock(): HashtagService {
   return {
-    initializeHashtag: jest.fn().mockResolvedValue(FAKE_HASHTAG),
+    initializeHashtag: jest.fn().mockResolvedValue(FAKE_HASHTAG as never),
   } as unknown as HashtagService;
 }
 

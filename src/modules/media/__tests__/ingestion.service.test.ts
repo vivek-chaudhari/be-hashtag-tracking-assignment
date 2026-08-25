@@ -66,12 +66,12 @@ function generateMediaRows(metaItems: MetaMediaItem[], hashtagId = FAKE_HASHTAG.
 }
 
 /** Creates a mock MediaFetcher. */
-function makeMediaFetcher(overrides: Partial<MediaFetcher> = {}): MediaFetcher {
+function makeMediaFetcher(overrides: Record<string, unknown> = {}): MediaFetcher {
   return {
     fetchMedia: jest.fn().mockResolvedValue({
       items: generateMetaItems(10),
       pagesFetched: 1,
-    }),
+    } as never),
     ...overrides,
   } as unknown as MediaFetcher;
 }
@@ -85,14 +85,20 @@ function makeDbMock(
     insertMediaThrow?: unknown;
   } = {},
 ) {
-  const selectWhereLimit = jest.fn().mockResolvedValue(opts.hashtagResult ?? [FAKE_HASHTAG]);
-  const syncRunReturning = jest.fn().mockResolvedValue(opts.syncRunResult ?? [FAKE_SYNC_RUN]);
+  const selectWhereLimit = jest
+    .fn()
+    .mockResolvedValue((opts.hashtagResult ?? [FAKE_HASHTAG]) as never);
+  const syncRunReturning = jest
+    .fn()
+    .mockResolvedValue((opts.syncRunResult ?? [FAKE_SYNC_RUN]) as never);
   const mediaReturning = opts.insertMediaThrow
-    ? jest.fn().mockRejectedValue(opts.insertMediaThrow)
+    ? jest.fn().mockRejectedValue(opts.insertMediaThrow as never)
     : jest
         .fn()
-        .mockResolvedValue(opts.mediaInsertResult ?? generateMediaRows(generateMetaItems(10)));
-  const updateSetWhere = jest.fn().mockResolvedValue([]);
+        .mockResolvedValue(
+          (opts.mediaInsertResult ?? generateMediaRows(generateMetaItems(10))) as never,
+        );
+  const updateSetWhere = jest.fn().mockResolvedValue([] as never);
 
   const db = {
     select: jest.fn().mockReturnValue({
@@ -168,7 +174,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: generateMediaRows(items),
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -194,7 +200,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: generateMediaRows(items),
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -220,7 +226,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: generateMediaRows(items),
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -245,7 +251,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: insertedRows,
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -268,7 +274,9 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: insertedRows,
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items: itemsWithDuplicates, pagesFetched: 1 }),
+      fetchMedia: jest
+        .fn()
+        .mockResolvedValue({ items: itemsWithDuplicates, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -289,7 +297,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: insertedRows,
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items: items500, pagesFetched: 20 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items: items500, pagesFetched: 20 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -326,7 +334,7 @@ describe('MediaIngestionService.syncMedia', () => {
       429,
     );
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockRejectedValue(apiError),
+      fetchMedia: jest.fn().mockRejectedValue(apiError as never),
     });
 
     const { db } = makeDbMock();
@@ -352,7 +360,7 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: generateMediaRows(items),
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -374,7 +382,7 @@ describe('MediaIngestionService.syncMedia', () => {
   it('handles 0 fetched items gracefully without attempting batch insert', async () => {
     const { db } = makeDbMock();
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items: [], pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items: [], pagesFetched: 1 } as never),
     });
 
     const service = new MediaIngestionService(fetcher, db as any);
@@ -397,11 +405,11 @@ describe('MediaIngestionService.syncMedia', () => {
       mediaInsertResult: createdRows,
     });
     fetcher = makeMediaFetcher({
-      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 }),
+      fetchMedia: jest.fn().mockResolvedValue({ items, pagesFetched: 1 } as never),
     });
 
     const sqsMock = {
-      sendMessage: jest.fn().mockResolvedValue('msg-id-1'),
+      sendMessage: jest.fn().mockResolvedValue('msg-id-1' as never),
     } as any;
 
     process.env.MEDIA_UPLOAD_QUEUE_URL =

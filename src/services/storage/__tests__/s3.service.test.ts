@@ -9,7 +9,7 @@ describe('S3StorageService', () => {
 
   beforeEach(() => {
     mockS3Client = {
-      send: jest.fn().mockResolvedValue({}),
+      send: jest.fn().mockResolvedValue({} as never),
     };
     s3Service = new S3StorageService(mockS3Client as unknown as S3Client, () => 'test-bucket-name');
   });

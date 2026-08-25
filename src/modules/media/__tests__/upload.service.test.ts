@@ -137,8 +137,8 @@ describe('MediaUploadService', () => {
       ok: true,
       status: 200,
       headers: new Headers({ 'content-type': 'image/jpeg' }),
-      arrayBuffer: jest.fn().mockResolvedValue(fakeImageBuffer),
-    }) as unknown as typeof fetch;
+      arrayBuffer: jest.fn().mockResolvedValue(fakeImageBuffer as never),
+    } as never) as unknown as typeof fetch;
 
     const result = await service.uploadMedia('media-valid');
 
@@ -178,8 +178,8 @@ describe('MediaUploadService', () => {
       ok: true,
       status: 200,
       headers: new Headers({ 'content-type': 'image/jpeg' }),
-      arrayBuffer: jest.fn().mockResolvedValue(fakeImageBuffer),
-    }) as unknown as typeof fetch;
+      arrayBuffer: jest.fn().mockResolvedValue(fakeImageBuffer as never),
+    } as never) as unknown as typeof fetch;
 
     await expect(service.uploadMedia('media-s3-fail')).rejects.toThrow('S3 Access Denied');
 
@@ -204,8 +204,8 @@ describe('MediaUploadService', () => {
       ok: true,
       status: 200,
       headers: new Headers(),
-      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0)),
-    }) as unknown as typeof fetch;
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0) as never),
+    } as never) as unknown as typeof fetch;
 
     await expect(service.uploadMedia('media-empty-dl')).rejects.toThrow(
       'Downloaded media asset for mediaId "media-empty-dl" is empty (0 bytes).',
