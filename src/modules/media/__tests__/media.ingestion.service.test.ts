@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { jest } from '@jest/globals';
-import { MediaIngestionService, sanitizeErrorMessage } from '../media.ingestion.service.js';
+import { MediaIngestionService, sanitizeErrorMessage } from '../ingestion.service.js';
 import type { MediaFetcher } from '../../instagram/media.fetcher.js';
 import type { Hashtag, Media, SyncRun } from '../../../db/schema.js';
 import type { MetaMediaItem } from '../../instagram/instagram.types.js';

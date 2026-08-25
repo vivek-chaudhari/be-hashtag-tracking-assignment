@@ -2,6 +2,8 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import type { Request, Response, NextFunction } from 'express';
 import { getHashtags } from '../hashtag.controller.js';
 import { mediaService } from '../../../modules/media/media.service.js';
+import { ApiResult } from '../../../common/classes/api-result.class.js';
+import { MESSAGES } from '../../../common/constant/message.constant.js';
 
 describe('getHashtags controller', () => {
   let req: Partial<Request>;
@@ -19,7 +21,7 @@ describe('getHashtags controller', () => {
     next = jest.fn();
   });
 
-  it('calls mediaService.getMedia with query params and returns 200 JSON', async () => {
+  it('calls mediaService.getMedia with query params and returns 200 JSON wrapped in ApiResult', async () => {
     req.query = { page: '2', limit: '10' };
 
     const mockResult = {
@@ -38,7 +40,9 @@ describe('getHashtags controller', () => {
 
     expect(mediaService.getMedia).toHaveBeenCalledWith({ page: 2, limit: 10 });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockResult);
+    expect(res.json).toHaveBeenCalledWith(
+      new ApiResult(MESSAGES.GET_HASHTAG_SUCCESS, undefined, mockResult),
+    );
     expect(next).not.toHaveBeenCalled();
   });
 

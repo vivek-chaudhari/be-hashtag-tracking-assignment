@@ -169,7 +169,7 @@ describe('InstagramClient', () => {
   // ── getTopMedia / getRecentMedia ──────────────────────────────────────────
 
   describe('getTopMedia', () => {
-    it('calls the correct endpoint and returns media list with reduced default fields and limit 10', async () => {
+    it('calls the correct endpoint and returns media list with default fields and limit 5', async () => {
       const fakeResponse = { data: [{ id: 'm1', media_type: 'IMAGE' }], paging: {} };
       globalThis.fetch = mockFetchOk(fakeResponse) as unknown as typeof fetch;
 
@@ -179,15 +179,15 @@ describe('InstagramClient', () => {
       const calledUrl = (globalThis.fetch as ReturnType<typeof jest.fn>).mock
         .calls[0]?.[0] as string;
       expect(calledUrl).toContain('17841583865247128/top_media');
-      expect(calledUrl).toContain('limit=10');
+      expect(calledUrl).toContain('limit=5');
       expect(calledUrl).toContain(
-        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption',
+        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption%2Clike_count%2Ccomments_count',
       );
     });
   });
 
   describe('getRecentMedia', () => {
-    it('calls the correct endpoint and returns media list with reduced default fields and limit 10', async () => {
+    it('calls the correct endpoint and returns media list with default fields and limit 5', async () => {
       const fakeResponse = { data: [{ id: 'm2', media_type: 'VIDEO' }] };
       globalThis.fetch = mockFetchOk(fakeResponse) as unknown as typeof fetch;
 
@@ -197,9 +197,9 @@ describe('InstagramClient', () => {
       const calledUrl = (globalThis.fetch as ReturnType<typeof jest.fn>).mock
         .calls[0]?.[0] as string;
       expect(calledUrl).toContain('17841583865247128/recent_media');
-      expect(calledUrl).toContain('limit=10');
+      expect(calledUrl).toContain('limit=5');
       expect(calledUrl).toContain(
-        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption',
+        'fields=id%2Cmedia_type%2Ctimestamp%2Cpermalink%2Cmedia_url%2Ccaption%2Clike_count%2Ccomments_count',
       );
     });
   });

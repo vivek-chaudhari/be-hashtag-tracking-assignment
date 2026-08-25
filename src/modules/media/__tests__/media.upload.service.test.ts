@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { MediaUploadService, generateMediaStorageKey } from '../media.upload.service.js';
+import { MediaUploadService, generateMediaStorageKey } from '../upload.service.js';
 import type { S3StorageService } from '../../../services/storage/s3.service.js';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type * as schema from '../../../db/schema.js';
