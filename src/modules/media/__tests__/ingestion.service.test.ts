@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 import { MediaIngestionService, sanitizeErrorMessage } from '../ingestion.service.js';
 import type { MediaFetcher } from '../../instagram/media.fetcher.js';
 import type { Hashtag, Media, SyncRun } from '../../../db/schema.js';
-import type { MetaMediaItem } from '../../instagram/instagram.types.js';
+import type { MetaMediaItem } from '../../../common/interfaces/instagram.interface.js';
 import { MetaApiError } from '../../instagram/instagram.errors.js';
 
 // ----------------------------------------------------------------
