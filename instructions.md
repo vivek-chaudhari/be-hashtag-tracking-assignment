@@ -396,20 +396,6 @@ The project should pass type checking and linting before submission.
 
 Meta ingestion and media downloading/S3 uploading are separated into two SQS-backed processing stages:
 
-```text
-Meta API
-   ↓
-Hashtag Sync Worker
-   ↓
-PostgreSQL
-   ↓
-Media Upload SQS
-   ↓
-Media Upload Worker
-   ↓
-S3
-```
-
 ### Benefit
 
 A slow media download or S3 upload does not block Meta pagination or hashtag ingestion.
